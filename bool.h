@@ -12,9 +12,9 @@ class Bool: public BooleanVector{
   public:
       Bool();
       Bool(int);
-      Bool(char*);
+      Bool(const char*);
       ~Bool();
-      Bool(Bool&);
+      Bool(const Bool&);
 
       virtual void copy(const BooleanVector * const source);
       virtual void Resize(const int &newLength);

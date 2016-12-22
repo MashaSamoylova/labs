@@ -19,7 +19,7 @@ Bool :: Bool(int len){
 	}
 }
 
-Bool :: Bool(char* string_bit){
+Bool :: Bool(const char* string_bit){
 	length = strlen(string_bit);
 	int n = length/(sizeof(base)*8) + !!(length%(sizeof(base)*8));
 	mass =  new base[n];
@@ -43,7 +43,7 @@ Bool :: ~Bool(){
     delete [] mass;
 }
 
-Bool :: Bool(Bool& old_b){
+Bool :: Bool(const Bool& old_b){
 	cout << "работает конструктор копирования" << endl;
 	length = old_b.length;
 	int n  = (length/(sizeof(base)*8)) + !!(length%(sizeof(base)*8));
@@ -88,19 +88,20 @@ int Bool :: GetLength() const{
 
 void Bool :: SetOne(const int &position){
 	if(position > length) throw INCORRECT_POSITION;
-	this -> SetValue(length-position-1, 1);
+	this -> SetValue(position, 1);
 }
 
 void Bool :: SetZero(const int &position){
 	if(position > length) throw INCORRECT_POSITION;
-	this -> SetValue(length-position-1, 0);
+	this -> SetValue(position, 0);
 }
 
 void  Bool :: SetValue(const int &position, const int &value){
 	if(position > length) throw INCORRECT_POSITION;
 	if(value != 0 && value != 1) throw  NON_BOOLEAN_VALUE;
 	int block = position/(sizeof(base)*8);
-	int i = sizeof(base)*8 - position % (sizeof(base)*8);
+//	int i = sizeof(base)*8 - position % (sizeof(base)*8);
+	int i = position%(sizeof(base)*8);
 	if(value){
 		this -> SetElementValue(block, this -> GetElementValue(block) | (1 << i));
 	}
@@ -119,7 +120,8 @@ void Bool :: SetElementValue(const int &position, const int &value){
 int Bool :: GetValue(const int &position) const{
 	if(position > length) throw INCORRECT_POSITION;
 	int block = position/(sizeof(base)*8);
-	int i = sizeof(base)*8 - position % (sizeof(base)*8);
+	//int i = sizeof(base)*8 - position % (sizeof(base)*8);
+	int i = position%(sizeof(base)*8);
 	if(this -> GetElementValue(block) & 1<<i){
 		return 1;
 	}
@@ -193,56 +195,56 @@ bool Bool :: IsNotEqual(const BooleanVector * const operand) const{
 
 void Bool :: LeftShift(const int &count, BooleanVector *result) const{
 	if(count > this -> GetLength()) throw INCORRECT_SHIFT_VALUE;
-	if(result -> GetLength() != this -> GetLength()) throw INCORRECT_LENGTH;
+	result -> Resize(this -> GetLength());
 	int len = this -> GetLength(); 
 	for(int i = 0; i < count; i++){
-		result -> SetValue(len-i, 0);
+		result -> SetValue(i, 0);
 	}
-	for(int i=0; i < len-count; i++){
-		result -> SetValue(i, this -> GetValue(i+count)); 
+	for(int i= count; i < len; i++){
+		result -> SetValue(i, this -> GetValue(i-count)); 
 	}
 }
 
 void Bool :: RightShift(const int &count, BooleanVector *result) const{
 	if(count > this-> GetLength()) throw INCORRECT_SHIFT_VALUE;
-	if(result -> GetLength() != this -> GetLength()) throw INCORRECT_LENGTH;
+	result -> Resize(this -> GetLength());
 	int len = this -> GetLength();
-	for(int i=0; i < count; i++){
+	for(int i=len-1; i > len-count; i--){
 		result -> SetValue(i,0);
 	}
-	for(int i=0; i < len - count; i++){
-		result -> SetValue(i+count, this -> GetValue(i));
+	for(int i=len-count-1; i >=0; i--){
+		result -> SetValue(i, this -> GetValue(i+count));
 	}
 }
 
 void Bool :: LeftCycleShift(const int &count, BooleanVector *result) const{
-	if(result -> GetLength() != this -> GetLength()) throw INCORRECT_LENGTH;
+	result -> Resize(this -> GetLength());
 	int new_count_of_shift = count % this -> GetLength();
 	int len = this -> GetLength();
-	for(int i=0; i < len-new_count_of_shift; i++){
-		result -> SetValue(i, this -> GetValue(i+new_count_of_shift));
+	for(int i=0; i < new_count_of_shift; i++){
+		result -> SetValue(i, this -> GetValue(i));
 	}
-	for(int i=len - new_count_of_shift, k=0; i<len; i++, k++){
-		result -> SetValue(i, this -> GetValue(k));
+	for(int i=new_count_of_shift; i<len; i++){
+		result -> SetValue(i, this -> GetValue(i-new_count_of_shift));
 	}
 }
 
 void Bool :: RightCycleShift(const int &count, BooleanVector *result) const{
-	if(result -> GetLength() != this -> GetLength()) throw INCORRECT_LENGTH;
+	result -> Resize(this -> GetLength());
 	int new_count_of_shift = count % this -> GetLength();
 	int len  = this -> GetLength();
-	for(int i=0, k=len - new_count_of_shift; i < new_count_of_shift; i++, k++){
-		result -> SetValue(i, this -> GetValue(k));
+	for(int i=len-1; i > len - new_count_of_shift; i--){
+		result -> SetValue(i, this -> GetValue(i));
 	}
-	for(int i=len - new_count_of_shift + 1, k=0; i< len; i++, k++){
-		result -> SetValue(i,this -> GetValue(k));
+	for(int i=len - new_count_of_shift -1; i >= 0; i--){
+		result -> SetValue(i,this -> GetValue(i+new_count_of_shift));
 	}
 }
 
 ostream& operator << (ostream &out, const BooleanVector * const source){
 	int n = source -> GetLength();
 	cout << "n = " << n << endl;
-	for (int i = 0; i < n; i++){
+	for (int i = n-1; i >= 0; i--){
 		out << source -> GetValue(i);
 	}
 	out << endl;
@@ -258,7 +260,6 @@ istream& operator >> (istream &in, BooleanVector *destination) {
 	string_for_vector = new char[n];
 	cout << "Input vector:" << endl;
 	in >> string_for_vector;
-	int new_block = n/(sizeof(base)*8) + !!(n%(sizeof(base)*8));
 	destination -> Resize(n);
 	destination -> ReadFromString(string_for_vector, n);
 	if(string_for_vector) {
@@ -270,10 +271,10 @@ void Bool :: ReadFromString(const char * const source, const int &sourceLength) 
 	for(int i = 0, k = 0; source[k] && i < sourceLength; i++,k++){
 		switch(source[k]){
 			case '1':
-				SetValue(i, 1);
+				SetValue(sourceLength-i-1, 1);
 				continue;
 			case '0':
-				SetValue(i, 0);
+				SetValue(sourceLength-i-1, 0);
 				continue;
 			default:
 				throw NON_BOOLEAN_VALUE;
