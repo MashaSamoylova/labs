@@ -282,3 +282,17 @@ void Bool :: ReadFromString(const char * const source, const int &sourceLength) 
       }
 	}
 }
+
+void Bool :: DeleteBit(const int &position, BooleanVector * cup) { 
+	if(position < 0 || position > length - 1) throw INCORRECT_POSITION;
+	cup -> Resize(this -> GetLength());
+	for(int i=0; i < this -> GetLength(); i++) { //rewriting this in cup
+		cup -> SetValue(i, this -> GetValue(i));
+	}
+	this -> Resize(this -> GetLength() - 1); //you understood me)
+	for(int i=0, index_for_new_vector=0; i < cup -> GetLength(); i++){
+		if(i == position) continue;
+		this -> SetValue(index_for_new_vector, cup -> GetValue(i));
+		index_for_new_vector++;
+	}
+}

@@ -38,4 +38,5 @@ class Bool: public BooleanVector{
       friend ostream& operator << (ostream &out, const BooleanVector * const source);
       friend istream& operator >> (istream &in, BooleanVector *destination);
       virtual void ReadFromString(const char * const source, const int &sourceLength);
+	  virtual void DeleteBit(const int &position, BooleanVector * cup);
     };

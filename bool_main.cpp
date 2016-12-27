@@ -1,66 +1,81 @@
 #include "bool.h"
-#include <list>
+#include <vector>
 
 using namespace BooleanVectorErrors;
 using namespace std;
 
-void top(list <Bool> array_of_columns, int n){
-	int* result = new int[n];
-	int index_of_result = 0;
-	int clm = 0;
-	list <Bool> :: iterator clm_iterator;
-	clm_iterator = array_of_columns.begin();
-	while(clm < array_of_columns.size()) { //ищем столбец, который не содержит 1
-		int s = 0;
-		for(s; s < n; s++){
-			if((*clm_iterator).GetValue(s))
-				break;
+void top(Bool* array_of_strings, int n, vector <int> result) {
+	int clm = 0; 
+	int str = 0;
+	vector <int> cup;
+	while(result.size() < n){
+		cout << "cup: " << cup.size() << endl;
+		for(clm = 0; clm < n; clm++) {
+			for(str = 0; str < n; str++){
+				if(array_of_strings[str].GetValue(clm)){ //если в столбце, его бросаем и идем ДАЛЬШЕ
+					cout << "daaaaa" << endl;
+					break;
+				}
+			
+				if(str = n){//found zero-column
+					cout << "n= " << n << endl << "clm = " << clm  << endl;
+					cup.push_back(clm); //иначе записываем в промеж вектор, чтобы потом удалить стороки
+				}
+			} 
 		}
-		if(s != n){
-			clm++;
-			continue;
-		} //если нашли 1, то пошли на след столбец
-			//иначе выписываем в решение
-		result[index_of_result] = clm;
-		index_of_result++;
-		list <Bool> :: iterator i;
-		i = array_of_columns.begin();
-		while(i != array_of_columns.end()) { //обнуляем строки
-			(*i).SetZero(s);
-			i++;
+		vector <int> :: iterator ld;
+		cout << "cup.size= " << cup.size() << endl;
+		ld = cup.begin();
+		while(ld != cup.end()){ //обнуляем строки(шаг2)
+			cout << "raz " << endl;
+			for(int i = 0; i < n; i++) {
+				array_of_strings[(*ld)].SetZero(i);
+			}
+			for(int i = 0; i < n; i++){ //удаляем столбец
+				array_of_strings[i].SetOne(*ld);
+			}
+			result.push_back(*ld); // записываем в решение
+			ld++;
 		}
-		array_of_columns.erase(clm_iterator);
-		clm_iterator = array_of_columns.begin();
-		clm = 0; //ничинаем заново
+		cup.clear();
+		for(int i = 0; i < n; i++) {
+			cout << &array_of_strings[i];
+		}
 	}
+	
+	vector <int> :: iterator for_show;
+	for_show = result.begin();
+	cout << result.size() << endl;
+	while(for_show != result.end()){
+		cout << (*for_show) << " ";
+		for_show++;
+	}
+	cout << endl;
 }
-
 int main(){
   try{
 
-    //Bool my_booleanVector;
-  //  cout << &my_booleanVector;
-   // cin >> &my_booleanVector;
-    //cout << &my_booleanVector;
-    //Bool second_vector;
- //   cin >> &second_vector;
-   // cout << &second_vector;
-  //  Bool result_vector;
-    //cin >> &result_vector;
-	//my_booleanVector.RightCycleShift(3, &second_vector);
-  //  my_booleanVector.RightCycleShift(3, &second_vector);
-    //cout << &second_vector;
-
-	list <Bool> array_of_columns;
+	Bool* array_of_strings;
 	int n;
 	cout << "input n:" << endl;
 	cin >> n;
+	array_of_strings = new Bool[n];
 	for(int i=0; i<n; i++){
-		Bool vector;
-		cin >> &vector;
-		array_of_columns.push_back(vector);
+		cin >> &array_of_strings[i];
 	}
 
+/*	for(int i=0; i<n; i++){
+		cout << &(array_of_strings[i]);
+	}*/
+
+	vector <int> result;
+	top(array_of_strings, n, result); 
+
+/*	Bool example;
+	Bool cup;
+	cin >> &example;
+	example.DeleteBit(3, &cup);
+	cout << &example;*/
     return 0;
   }
   catch(BooleanVectorError my_error){
